@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #160B28;
+  --bg-secondary: #23123D;
+  --bg-card: rgba(35, 18, 61, 0.65);
+  --accent-pink: #FF6FAE;
+  --accent-lavender: #C7A7FF;
+  --accent-gold: #FFD166;
+  --text-main: #FFFFFF;
+  --text-muted: #D1C4E9;
+  --border-glow: rgba(255, 111, 174, 0.3);
+}
+
+/* Theme Classes */
+.theme-pink-purple {
+  --bg-primary: #160B28;
+  --bg-secondary: #241142;
+  --bg-card: rgba(36, 17, 66, 0.7);
+  --accent-pink: #FF6FAE;
+  --accent-lavender: #C7A7FF;
+  --accent-gold: #FFD166;
+  --text-main: #FFFFFF;
+  --text-muted: #E2D4F8;
+  --border-glow: rgba(255, 111, 174, 0.35);
+}
+
+.theme-black-gold {
+  --bg-primary: #0F0F13;
+  --bg-secondary: #1A1A24;
+  --bg-card: rgba(26, 26, 36, 0.75);
+  --accent-pink: #FFD166;
+  --accent-lavender: #F4C430;
+  --accent-gold: #FFF3BF;
+  --text-main: #FFFFFF;
+  --text-muted: #D3CBB8;
+  --border-glow: rgba(255, 209, 102, 0.4);
+}
+
+.theme-blue-silver {
+  --bg-primary: #0A192F;
+  --bg-secondary: #112240;
+  --bg-card: rgba(17, 34, 64, 0.75);
+  --accent-pink: #64FFDA;
+  --accent-lavender: #A855F7;
+  --accent-gold: #38BDF8;
+  --text-main: #F8FAFC;
+  --text-muted: #CBD5E1;
+  --border-glow: rgba(100, 255, 218, 0.35);
+}
+
+.theme-pastel-floral {
+  --bg-primary: #1E1728;
+  --bg-secondary: #2C223B;
+  --bg-card: rgba(44, 34, 59, 0.75);
+  --accent-pink: #F472B6;
+  --accent-lavender: #F472B6;
+  --accent-gold: #FCD34D;
+  --text-main: #FFF1F2;
+  --text-muted: #FECDD3;
+  --border-glow: rgba(244, 114, 182, 0.4);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.5s ease;
+}
+
+.font-serif-display {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-script {
+  font-family: 'Dancing Script', cursive;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent-pink);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-lavender);
+}
+
+/* Glassmorphism utility */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glow);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(3deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 15px var(--accent-pink), 0 0 30px var(--accent-lavender); }
+  50% { box-shadow: 0 0 25px var(--accent-pink), 0 0 50px var(--accent-lavender); }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s infinite;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FFF3BF 0%, #FFD166 50%, #F4C430 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-pink {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FF6FAE 50%, #C7A7FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
