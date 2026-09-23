@@ -23,6 +23,121 @@ class BirthdayPhotoController extends Controller
         ]);
     }
 
+    public function storePublic(Request $request, $slug): JsonResponse
+    {
+        $birthday = Birthday::where('slug', $slug)->first();
+        if (!$birthday) {
+            $birthday = Birthday::first();
+        }
+
+        $imagePath = $request->input('image_path') ?? $request->input('url');
+        $caption = $request->input('caption', 'Memories ❤️');
+
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('gallery', 'public');
+            $imagePath = Storage::url($path);
+        }
+
+        if (!$imagePath) {
+            return response()->json(['message' => 'Image photo file or image_path is required'], 422);
+        }
+
+        $photo = BirthdayPhoto::create([
+            'birthday_id' => $birthday ? $birthday->id : 1,
+            'image_path' => $imagePath,
+            'caption' => $caption,
+            'sort_order' => $birthday ? ($birthday->photos()->max('sort_order') + 1) : 1,
+        ]);
+
+        return response()->json([
+            'message' => 'Photo added successfully',
+            'data' => new BirthdayPhotoResource($photo)
+        ], 201);
+    }
+
+    public function storePublicBatch(Request $request, $slug): JsonResponse
+    {
+        $birthday = Birthday::where('slug', $slug)->first();
+        if (!$birthday) {
+            $birthday = Birthday::first();
+        }
+
+        $createdPhotos = [];
+        $currentSortOrder = (int) ($birthday ? $birthday->photos()->max('sort_order') : 0);
+        $birthdayId = $birthday ? $birthday->id : 1;
+        $caption = $request->input('caption') ? $request->input('caption') : 'Memories ❤️';
+
+        // 1. Array of uploaded file objects (photos[])
+        if ($request->hasFile('photos')) {
+            $files = is_array($request->file('photos')) ? $request->file('photos') : [$request->file('photos')];
+            foreach ($files as $idx => $file) {
+                $path = $file->store('gallery', 'public');
+                $url = Storage::url($path);
+                $currentSortOrder++;
+
+                $photo = BirthdayPhoto::create([
+                    'birthday_id' => $birthdayId,
+                    'image_path' => $url,
+                    'caption' => $caption,
+                    'sort_order' => $currentSortOrder,
+                ]);
+
+                $createdPhotos[] = new BirthdayPhotoResource($photo);
+            }
+        }
+
+        // 2. Single uploaded file object (photo)
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $path = $file->store('gallery', 'public');
+            $url = Storage::url($path);
+            $currentSortOrder++;
+
+            $photo = BirthdayPhoto::create([
+                'birthday_id' => $birthdayId,
+                'image_path' => $url,
+                'caption' => $caption,
+                'sort_order' => $currentSortOrder,
+            ]);
+
+            $createdPhotos[] = new BirthdayPhotoResource($photo);
+        }
+
+        // 3. Array of image URL strings / base64 (image_paths[])
+        if ($request->has('image_paths') && is_array($request->image_paths)) {
+            foreach ($request->image_paths as $idx => $urlPath) {
+                if ($urlPath) {
+                    $currentSortOrder++;
+                    $photo = BirthdayPhoto::create([
+                        'birthday_id' => $birthdayId,
+                        'image_path' => $urlPath,
+                        'caption' => $caption,
+                        'sort_order' => $currentSortOrder,
+                    ]);
+                    $createdPhotos[] = new BirthdayPhotoResource($photo);
+                }
+            }
+        }
+
+        // 4. Single image URL or base64 string
+        $singleUrl = $request->input('image_path') ?? $request->input('url');
+        if ($singleUrl && !$request->hasFile('photo') && !$request->hasFile('photos')) {
+            $currentSortOrder++;
+            $photo = BirthdayPhoto::create([
+                'birthday_id' => $birthdayId,
+                'image_path' => $singleUrl,
+                'caption' => $caption,
+                'sort_order' => $currentSortOrder,
+            ]);
+            $createdPhotos[] = new BirthdayPhotoResource($photo);
+        }
+
+        return response()->json([
+            'message' => count($createdPhotos) . ' photos uploaded successfully',
+            'data' => $createdPhotos
+        ], 201);
+    }
+
     public function store(StoreBirthdayPhotoRequest $request, $birthdayId): JsonResponse
     {
         $birthday = Birthday::where('user_id', $request->user()->id)->findOrFail($birthdayId);
@@ -175,6 +290,20 @@ class BirthdayPhotoController extends Controller
 
         return response()->json([
             'message' => 'Photos reordered successfully'
+        ]);
+    }
+
+    public function destroyPublic(Request $request, $slug, $photoId): JsonResponse
+    {
+        $birthday = Birthday::where('slug', $slug)->first();
+        if ($birthday) {
+            BirthdayPhoto::where('birthday_id', $birthday->id)->where('id', $photoId)->delete();
+        } else {
+            BirthdayPhoto::where('id', $photoId)->delete();
+        }
+
+        return response()->json([
+            'message' => 'Photo deleted successfully'
         ]);
     }
 }

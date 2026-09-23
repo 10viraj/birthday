@@ -1,31 +1,53 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, Volume2, VolumeX, Music } from 'lucide-react';
+import { Music, Volume2, VolumeX, Play, Pause, SkipForward, Sparkles } from 'lucide-react';
+
+const MUSIC_TRACKS = [
+  {
+    title: "Soft Romantic Birthday Instrumental",
+    artist: "Romantic Melodies",
+    url: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-piano-112199.mp3",
+  },
+  {
+    title: "Happy Birthday Piano Grace",
+    artist: "Celebration Beats",
+    url: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73562.mp3?filename=happy-birthday-to-you-piano-version-13909.mp3",
+  },
+];
 
 export default function MusicPlayer({ musicPath, isAutoPlayTriggered }) {
-  const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(0.6);
-  const [hasInteracted, setHasInteracted] = useState(false);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+  const audioRef = useRef(null);
 
-  const defaultMusic = 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-ambient-112282.mp3';
-  const audioSrc = musicPath || defaultMusic;
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-    }
-  }, [volume]);
+  const activeTrackUrl = musicPath || MUSIC_TRACKS[currentTrackIndex].url;
 
   useEffect(() => {
-    if (isAutoPlayTriggered && audioRef.current && !hasInteracted) {
-      setHasInteracted(true);
-      audioRef.current.play()
+    audioRef.current = new Audio(activeTrackUrl);
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.5;
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [activeTrackUrl]);
+
+  useEffect(() => {
+    if (isAutoPlayTriggered && audioRef.current && !isPlaying) {
+      audioRef.current
+        .play()
         .then(() => setIsPlaying(true))
-        .catch(err => console.log('Autoplay prevented by browser:', err));
+        .catch(() => {
+          // Browser prevented autoplay without click
+          setIsPlaying(false);
+        });
     }
-  }, [isAutoPlayTriggered, hasInteracted]);
+  }, [isAutoPlayTriggered]);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -33,9 +55,10 @@ export default function MusicPlayer({ musicPath, isAutoPlayTriggered }) {
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.play()
+      audioRef.current
+        .play()
         .then(() => setIsPlaying(true))
-        .catch(err => console.log('Audio playback error:', err));
+        .catch((e) => console.log('Audio play error:', e));
     }
   };
 
@@ -45,62 +68,96 @@ export default function MusicPlayer({ musicPath, isAutoPlayTriggered }) {
     setIsMuted(!isMuted);
   };
 
-  const handleVolumeChange = (e) => {
-    const val = parseFloat(e.target.value);
-    setVolume(val);
+  const nextTrack = () => {
     if (audioRef.current) {
-      audioRef.current.volume = val;
-      if (val === 0) setIsMuted(true);
-      else setIsMuted(false);
+      audioRef.current.pause();
     }
+    const nextIdx = (currentTrackIndex + 1) % MUSIC_TRACKS.length;
+    setCurrentTrackIndex(nextIdx);
+    setIsPlaying(false);
   };
 
   return (
     <div className="fixed bottom-6 right-6 z-40">
-      <audio 
-        ref={audioRef}
-        src={audioSrc}
-        loop
-        preload="auto"
-      />
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 10 }}
+            className="mb-3 glass-card p-4 rounded-2xl border border-pink-500/40 shadow-2xl w-64 text-left backdrop-blur-xl"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-pink-300 flex items-center gap-1">
+                <Music size={12} /> Background Music
+              </span>
+              <span className="text-[10px] text-purple-300/70">
+                {isPlaying ? 'Playing 🎵' : 'Paused ⏸️'}
+              </span>
+            </div>
 
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="glass-card p-3 rounded-full border border-pink-500/30 shadow-2xl flex items-center gap-3 bg-purple-950/80 backdrop-blur-xl"
+            <p className="text-xs font-semibold text-white truncate">
+              {MUSIC_TRACKS[currentTrackIndex].title}
+            </p>
+            <p className="text-[10px] text-purple-200/70 truncate mb-3">
+              {MUSIC_TRACKS[currentTrackIndex].artist}
+            </p>
+
+            <div className="flex items-center justify-between gap-2 pt-2 border-t border-pink-500/20">
+              <button
+                onClick={togglePlay}
+                className="p-2 rounded-full bg-pink-500 text-white hover:bg-pink-600 transition-colors cursor-pointer"
+              >
+                {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
+              </button>
+
+              <button
+                onClick={toggleMute}
+                className="p-2 rounded-full bg-white/10 text-purple-200 hover:text-white transition-colors cursor-pointer"
+              >
+                {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+              </button>
+
+              <button
+                onClick={nextTrack}
+                className="p-2 rounded-full bg-white/10 text-purple-200 hover:text-white transition-colors cursor-pointer"
+                title="Next Track"
+              >
+                <SkipForward size={16} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Toggle Button */}
+      <motion.button
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => {
+          if (!expanded) {
+            setExpanded(true);
+            if (!isPlaying) togglePlay();
+          } else {
+            setExpanded(false);
+          }
+        }}
+        className={`p-4 rounded-full glass-card border-2 shadow-2xl flex items-center justify-center gap-2 cursor-pointer transition-all ${
+          isPlaying
+            ? 'border-pink-400 bg-pink-500/30 text-pink-300 shadow-[0_0_20px_rgba(255,111,174,0.5)]'
+            : 'border-purple-400/40 text-purple-200 hover:bg-white/10'
+        }`}
+        title="Background Music Controls"
       >
-        <button
-          onClick={togglePlay}
-          className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white flex items-center justify-center shadow-lg hover:scale-105 transition-transform cursor-pointer"
-        >
-          {isPlaying ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
-        </button>
-
-        <div className="hidden sm:flex flex-col text-left pr-2">
-          <span className="text-[10px] uppercase font-bold text-pink-300 tracking-wider flex items-center gap-1">
-            <Music size={10} className={isPlaying ? 'animate-bounce' : ''} />
-            <span>Birthday Music</span>
+        <Music size={22} className={isPlaying ? 'animate-bounce text-pink-300' : ''} />
+        {isPlaying && (
+          <span className="flex items-center gap-0.5 h-3">
+            <span className="w-1 bg-pink-400 animate-pulse h-full rounded-full" />
+            <span className="w-1 bg-amber-300 animate-pulse h-2 rounded-full" />
+            <span className="w-1 bg-pink-400 animate-pulse h-full rounded-full" />
           </span>
-          <span className="text-xs text-white font-medium max-w-[120px] truncate">
-            {isPlaying ? 'Playing Romantic Bliss' : 'Background Music'}
-          </span>
-        </div>
-
-        <div className="hidden md:flex items-center gap-2 border-l border-white/10 pl-3">
-          <button onClick={toggleMute} className="text-purple-200 hover:text-white cursor-pointer">
-            {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
-          </button>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={isMuted ? 0 : volume}
-            onChange={handleVolumeChange}
-            className="w-16 h-1 bg-purple-800 rounded-lg appearance-none cursor-pointer accent-pink-500"
-          />
-        </div>
-      </motion.div>
+        )}
+      </motion.button>
     </div>
   );
 }

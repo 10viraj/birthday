@@ -23,6 +23,9 @@ Route::get('/public/birthdays/{slug}', [BirthdayController::class, 'getPublicByS
 Route::post('/public/birthdays/{slug}/unlock', [BirthdayController::class, 'unlockPublicPage']);
 Route::get('/public/birthdays/{slug}/wishes', [BirthdayWishController::class, 'getPublicWishes']);
 Route::post('/public/birthdays/{slug}/wishes', [BirthdayWishController::class, 'submitPublicWish']);
+Route::post('/public/birthdays/{slug}/photos', [BirthdayPhotoController::class, 'storePublic']);
+Route::post('/public/birthdays/{slug}/photos/batch', [BirthdayPhotoController::class, 'storePublicBatch']);
+Route::delete('/public/birthdays/{slug}/photos/{photoId}', [BirthdayPhotoController::class, 'destroyPublic']);
 
 /*
 |--------------------------------------------------------------------------

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('birthday_photos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('birthday_id')->constrained('birthdays')->onDelete('cascade');
-            $table->string('image_path');
+            $table->text('image_path');
             $table->string('caption')->nullable();
             $table->text('description')->nullable();
             $table->date('taken_at')->nullable();

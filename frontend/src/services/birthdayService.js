@@ -16,6 +16,27 @@ export const birthdayService = {
     return response.data;
   },
 
+  async addPublicPhoto(slug, photoData) {
+    const isFormData = photoData instanceof FormData;
+    const response = await API.post(`/public/birthdays/${slug}/photos`, photoData, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {}
+    });
+    return response.data;
+  },
+
+  async addPublicPhotosBatch(slug, photoData) {
+    const isFormData = photoData instanceof FormData;
+    const response = await API.post(`/public/birthdays/${slug}/photos/batch`, photoData, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {}
+    });
+    return response.data;
+  },
+
+  async deletePublicPhoto(slug, photoId) {
+    const response = await API.delete(`/public/birthdays/${slug}/photos/${photoId}`);
+    return response.data;
+  },
+
   // Admin
   async getAll() {
     const response = await API.get('/birthdays');

@@ -20,7 +20,7 @@ export default function CelebrationFooter({ birthdayName, onReplay }) {
         // Fallback to copy if share canceled or unsupported
       }
     }
-    
+
     // Copy fallback
     navigator.clipboard.writeText(url);
     setCopied(true);
@@ -47,7 +47,7 @@ export default function CelebrationFooter({ birthdayName, onReplay }) {
         viewport={{ once: true }}
         className="glass-card rounded-3xl p-8 md:p-12 border border-pink-500/30 shadow-2xl relative overflow-hidden"
       >
-        <motion.div 
+        <motion.div
           animate={{ rotate: [0, 10, -10, 0] }}
           transition={{ duration: 3, repeat: Infinity }}
           className="inline-flex p-3 rounded-full bg-pink-500/20 text-pink-400 mb-4 border border-pink-500/40"
@@ -56,11 +56,11 @@ export default function CelebrationFooter({ birthdayName, onReplay }) {
         </motion.div>
 
         <h2 className="text-4xl md:text-6xl font-serif-display font-extrabold text-white mb-3">
-          Happy Birthday Again, <span className="text-gradient-pink font-script">{birthdayName}!</span> ✨
+          Coming Soon... <span className="text-gradient-pink font-script">Until We Meet Again, {birthdayName}!</span> ✨
         </h2>
 
         <p className="text-purple-200/80 text-sm md:text-base max-w-md mx-auto mb-8 font-light">
-          May your year ahead be filled with infinite joy, magic, and sweet memories.
+          Counting down the days until we meet again and create even more beautiful memories together.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
@@ -98,7 +98,7 @@ export default function CelebrationFooter({ birthdayName, onReplay }) {
       </motion.div>
 
       <div className="mt-8 text-xs text-purple-300/40">
-        Created with ❤️ on <span className="text-pink-400 font-semibold">Birthday Bliss</span>
+        Created with ❤️ on <span className="text-pink-400 font-semibold">Viraj Somani</span>
       </div>
     </footer>
   );

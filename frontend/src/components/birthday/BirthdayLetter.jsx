@@ -1,142 +1,282 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, MailOpen, Heart, RotateCcw, Feather } from 'lucide-react';
+import { Mail, MailOpen, Heart, RotateCcw, Feather, Sparkles, ArrowRight, FastForward, Maximize2, Minimize2 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
-export default function BirthdayLetter({ title, content, signature, birthdayName }) {
+export default function BirthdayLetter({ title, content, signature, birthdayName = "My Love", onContinueToMemories }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [displayedContent, setDisplayedContent] = useState('');
+  const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isEnvelopeOpening, setIsEnvelopeOpening] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const fullText = content || `On your special day, I wanted to create something truly magical to celebrate you.\n\nFrom our late-night conversations to all the unforgettable memories we've built, every single moment with you is a treasure.\n\nMay this new chapter bring you endless joy, peace, and dreams fulfilled. Keep shining bright like you always do!`;
+  // Default heartfelt letter body
+  const defaultLetterBody = `Happy Birthday, ${birthdayName}! ❤️🎂
+
+Today is all about celebrating you — my best friend, my favorite person, and someone who makes life a little brighter just by being in it. ✨
+
+I’m genuinely lucky to have a friend like you. Thank you for all the crazy conversations, endless laughs, unforgettable memories, random moments, and for always being there. Some of my favorite memories are the ones I’ve shared with you. 🥹❤️
+
+No matter how much time passes or how life changes, I hope our friendship always stays the same — full of laughter, stupid jokes, honest conversations, and countless memories waiting to be made. 🫶
+
+I hope this new year of your life brings you everything you deserve — happiness that never fades, success that makes you proud, people who truly value you, and countless reasons to smile. 🌸✨
+
+Never stop being the amazing person you are. Keep smiling, keep shining, and keep being YOU. 💖
+
+And remember… you’re not just my friend, you’re a part of some of the best chapters of my life. ❤️
+
+Happy Birthday once again, Kaviiiii! 🎂🥳
+Here’s to more adventures, more laughter, more secrets, and a lifetime of beautiful memories together.`;
+
+  const letterText = content || defaultLetterBody;
+
+  const handleOpenEnvelope = () => {
+    setIsEnvelopeOpening(true);
+
+    // Confetti burst on envelope open
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+
+    setTimeout(() => {
+      setIsOpen(true);
+      setIsEnvelopeOpening(false);
+    }, 600);
+  };
 
   useEffect(() => {
-    if (isOpen) {
-      setDisplayedContent('');
-      setIsTyping(true);
-      let index = 0;
-      const timer = setInterval(() => {
-        if (index < fullText.length) {
-          setDisplayedContent(prev => prev + fullText.charAt(index));
-          index++;
-        } else {
-          setIsTyping(false);
-          clearInterval(timer);
-        }
-      }, 30);
-      return () => clearInterval(timer);
-    }
-  }, [isOpen, fullText]);
+    if (!isOpen) return;
 
-  const replayTyping = () => {
-    setDisplayedContent('');
+    setDisplayedText('');
     setIsTyping(true);
-    let index = 0;
+    let charIndex = 0;
+
     const timer = setInterval(() => {
-      if (index < fullText.length) {
-        setDisplayedContent(prev => prev + fullText.charAt(index));
-        index++;
-      } else {
+      charIndex++;
+      setDisplayedText(letterText.slice(0, charIndex));
+      if (charIndex >= letterText.length) {
         setIsTyping(false);
         clearInterval(timer);
       }
-    }, 30);
+    }, 18);
+
+    return () => clearInterval(timer);
+  }, [isOpen, letterText]);
+
+  const showFullImmediately = () => {
+    setDisplayedText(letterText);
+    setIsTyping(false);
+  };
+
+  const replayTyping = () => {
+    setDisplayedText('');
+    setIsTyping(true);
+    let charIndex = 0;
+    const timer = setInterval(() => {
+      charIndex++;
+      setDisplayedText(letterText.slice(0, charIndex));
+      if (charIndex >= letterText.length) {
+        setIsTyping(false);
+        clearInterval(timer);
+      }
+    }, 18);
   };
 
   return (
-    <section className="py-16 px-4 max-w-3xl mx-auto text-center">
-      <div className="mb-6 flex flex-col items-center">
-        <div className="inline-flex p-3 rounded-full bg-pink-500/20 text-pink-400 mb-3 border border-pink-500/40">
-          <Feather size={28} />
+    <section id="birthday-letter" className="py-4 md:py-8 px-2 sm:px-4 max-w-5xl mx-auto text-center relative z-10 min-h-[calc(100vh-90px)] flex flex-col justify-center items-center">
+      {/* Section Header */}
+      <div className="mb-6 md:mb-8 flex flex-col items-center">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FF3FA4]/20 text-pink-300 font-semibold tracking-wider text-xs uppercase mb-2 border border-pink-400/30 glow-pink">
+          <Feather size={13} className="text-pink-400" />
+          <span>PAGE 2 — Heartfelt Birthday Letter 💌</span>
+          <Sparkles size={13} className="text-amber-300" />
         </div>
-        <h2 className="text-3xl md:text-4xl font-serif-display font-bold text-white">
-          A Personal Birthday Letter 💌
+        <h2 className="text-2xl sm:text-4xl md:text-5xl font-serif-display font-extrabold text-white mb-1.5 leading-tight drop-shadow-md">
+          {title || "Something Special Is Waiting For You… 💌"}
         </h2>
-        <p className="text-purple-200/80 text-sm mt-1">
-          A heartfelt message written especially for {birthdayName}
+        <p className="text-purple-200/90 text-xs sm:text-sm font-light max-w-md">
+          A personal surprise written with infinite friendship & warmth for {birthdayName}.
         </p>
       </div>
 
       {!isOpen ? (
-        /* Sealed Envelope View */
-        <motion.div 
+        /* Sealed Vintage Envelope Container */
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-card max-w-md mx-auto p-10 rounded-3xl border border-pink-500/30 flex flex-col items-center shadow-2xl relative group cursor-pointer"
-          onClick={() => setIsOpen(true)}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="glass-card max-w-md sm:max-w-lg w-full mx-auto p-5 sm:p-8 md:p-10 rounded-3xl border border-pink-500/30 flex flex-col items-center shadow-2xl relative backdrop-blur-xl group overflow-hidden"
         >
-          {/* Envelope SVG Graphic */}
-          <div className="relative w-48 h-36 bg-gradient-to-tr from-purple-900 to-pink-900 rounded-2xl border-2 border-pink-400/40 flex items-center justify-center shadow-xl mb-6 transform group-hover:scale-105 transition-transform duration-300">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-pink-500/20 to-transparent rounded-2xl" />
-            
-            {/* Wax Seal */}
-            <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-pink-600 to-amber-500 flex items-center justify-center shadow-lg border-2 border-amber-300 z-10">
-              <Heart className="fill-white text-pink-600" size={24} />
-            </div>
-          </div>
+          {/* Glowing Background Radial */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-gradient-to-tr from-[#FF3FA4]/30 via-[#A83CFF]/30 to-[#FFD166]/20 blur-3xl pointer-events-none" />
 
-          <h3 className="text-xl font-serif-display font-bold text-white mb-2">
-            For {birthdayName}
+          {/* Interactive Envelope Graphic */}
+          <motion.div
+            animate={isEnvelopeOpening ? { scale: 1.08, rotate: [0, -3, 3, 0] } : { y: [-3, 3, -3] }}
+            transition={{ duration: isEnvelopeOpening ? 0.6 : 4, repeat: isEnvelopeOpening ? 0 : Infinity }}
+            onClick={handleOpenEnvelope}
+            className="relative w-56 h-36 sm:w-64 sm:h-40 bg-gradient-to-tr from-[#24113F] via-[#351A5B] to-[#FF3FA4]/30 rounded-3xl border-2 border-pink-400/60 flex items-center justify-center shadow-2xl mb-5 cursor-pointer group-hover:border-pink-300 transition-all duration-300"
+          >
+            {/* Inner Gold Border Accent */}
+            <div className="absolute inset-2 border border-amber-300/30 rounded-2xl pointer-events-none" />
+
+            {/* Envelope Triangular Top Flap Graphic */}
+            <motion.div
+              animate={isEnvelopeOpening ? { rotateX: 180, opacity: 0.5 } : { rotateX: 0 }}
+              transition={{ duration: 0.5 }}
+              className="absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-purple-900/60 via-pink-600/20 to-transparent rounded-t-3xl border-b border-pink-400/30 shadow-md origin-top"
+            />
+
+            {/* Glowing Wax Seal Button */}
+            <motion.div
+              whileHover={{ scale: 1.12 }}
+              whileTap={{ scale: 0.9 }}
+              animate={{ scale: [1, 1.08, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-[#FF3FA4] via-rose-500 to-[#FFD166] flex items-center justify-center shadow-2xl border-2 border-amber-200 z-10 glow-pink cursor-pointer"
+            >
+              <Heart className="fill-white text-white drop-shadow-md" size={26} />
+            </motion.div>
+
+            {/* Floating Hearts from Envelope */}
+            <div className="absolute -top-3 right-5 text-pink-400 animate-float"><Heart size={16} fill="currentColor" /></div>
+            <div className="absolute bottom-3 left-5 text-amber-300 animate-pulse"><Sparkles size={14} /></div>
+          </motion.div>
+
+          <h3 className="text-xl sm:text-2xl font-serif-display font-bold text-white mb-1">
+            For {birthdayName} ❤️
           </h3>
-          <p className="text-xs text-purple-200/70 mb-6">
-            Sealed with love & warm wishes
+          <p className="text-xs text-purple-200/80 mb-5 font-light">
+            Sealed with love & warm wishes. Tap the envelope to unseal!
           </p>
 
           <motion.button
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.95 }}
-            className="px-6 py-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-medium text-sm shadow-lg flex items-center gap-2 cursor-pointer"
+            onClick={handleOpenEnvelope}
+            className="px-7 py-3 rounded-full bg-gradient-to-r from-[#FF3FA4] via-[#A83CFF] to-[#FFD166] text-white font-bold text-sm sm:text-base shadow-xl flex items-center gap-2 cursor-pointer border border-white/20 glow-pink"
           >
             <MailOpen size={18} />
-            <span>Open Your Letter</span>
+            <span>Open Your Letter 💌</span>
           </motion.button>
         </motion.div>
       ) : (
-        /* Open Letter Paper View */
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative max-w-xl mx-auto p-8 md:p-12 rounded-2xl bg-[#FFFDF7] text-gray-800 shadow-2xl border-8 border-pink-200/50 text-left font-serif-display leading-relaxed"
-        >
-          {/* Vintage Stamp Top Right */}
-          <div className="absolute top-6 right-6 w-14 h-16 border-2 border-dashed border-pink-400/60 p-1 flex flex-col items-center justify-center bg-pink-50/50">
-            <Heart size={16} className="text-pink-500 fill-pink-500" />
-            <span className="text-[8px] font-bold tracking-widest uppercase text-pink-700 mt-1">Bliss</span>
-          </div>
-
-          <h3 className="text-2xl md:text-3xl font-bold text-purple-950 mb-6 italic border-b border-pink-200 pb-3">
-            {title || `Dearest ${birthdayName},`}
-          </h3>
-
-          <div className="text-base md:text-lg text-gray-700 font-normal whitespace-pre-line min-h-[160px] font-sans">
-            {displayedContent}
-            {isTyping && <span className="inline-block w-2 h-5 bg-pink-500 ml-1 animate-pulse" />}
-          </div>
-
-          {signature && (
-            <div className="mt-8 pt-4 border-t border-pink-200 text-right">
-              <p className="font-script text-2xl md:text-3xl text-pink-700 font-bold">
-                {signature}
-              </p>
-            </div>
-          )}
-
-          <div className="mt-8 pt-4 flex justify-between items-center text-xs text-gray-400 font-sans">
-            <button
-              onClick={replayTyping}
-              className="flex items-center gap-1.5 text-pink-600 hover:text-pink-800 font-medium cursor-pointer"
+        /* Opened Vintage Stationery Letter Paper View */
+        <AnimatePresence>
+          <div className={isFullscreen ? "fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-6 overflow-y-auto" : "w-full"}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 25 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className={`relative w-full mx-auto text-left overflow-hidden bg-[#FAF6EE] text-gray-900 shadow-2xl border-4 border-amber-300/80 ${
+                isFullscreen
+                  ? 'max-w-6xl max-h-[92vh] overflow-y-auto rounded-3xl p-6 sm:p-12 md:p-16 my-auto'
+                  : 'max-w-5xl rounded-3xl p-6 sm:p-10 md:p-14'
+              }`}
+              style={{
+                backgroundImage: `linear-gradient(to bottom, rgba(220, 190, 140, 0.08) 1px, transparent 1px)`,
+                backgroundSize: '100% 2.4rem'
+              }}
             >
-              <RotateCcw size={14} />
-              <span>Replay Typing</span>
-            </button>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-gray-500 hover:text-gray-700 cursor-pointer"
-            >
-              Close Letter
-            </button>
+              {/* Gold Decorative Corner Borders */}
+              <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-amber-400/80 rounded-tl-lg pointer-events-none" />
+              <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-amber-400/80 rounded-tr-lg pointer-events-none" />
+              <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-amber-400/80 rounded-bl-lg pointer-events-none" />
+              <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-amber-400/80 rounded-br-lg pointer-events-none" />
+
+              {/* Inner Ornamental Frame */}
+              <div className="absolute inset-4 border border-amber-400/30 rounded-2xl pointer-events-none" />
+
+              {/* Ultra-subtle Heart Watermark */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-[0.03] text-pink-900">
+                <Heart size={380} fill="currentColor" />
+              </div>
+
+              {/* Top Stationery Header Bar */}
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-amber-300/40 relative z-10 gap-2 flex-wrap">
+                {/* Left Ribbon Badge & Full Screen Toggle */}
+                <div className="flex items-center gap-2">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-pink-100/90 text-pink-800 font-bold text-xs uppercase tracking-wider border border-pink-300/60 shadow-sm">
+                    <Sparkles size={13} className="text-amber-600" />
+                    <span>Personal Letter 💌</span>
+                  </div>
+
+                  {/* Full Screen Toggle Button */}
+                  <button
+                    onClick={() => setIsFullscreen(!isFullscreen)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-pink-800 hover:text-pink-950 bg-pink-100/90 hover:bg-pink-200 px-3.5 py-1.5 rounded-full transition-all cursor-pointer border border-pink-300/70 shadow-sm"
+                    title="Toggle Fullscreen View"
+                  >
+                    {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                    <span>{isFullscreen ? 'Exit Full Screen' : 'Full Screen ⛶'}</span>
+                  </button>
+                </div>
+
+                {/* Right Postage Stamp Graphic */}
+                <div className="w-16 h-20 border-2 border-dashed border-pink-400/80 p-1.5 flex flex-col items-center justify-center bg-pink-50/90 rounded-lg shadow-sm">
+                  <Heart size={20} className="text-pink-600 fill-pink-500" />
+                  <span className="text-[9px] font-bold tracking-widest uppercase text-pink-800 mt-1">BESTIE</span>
+                </div>
+              </div>
+
+              {/* Handwritten Letter Body */}
+              <div className="font-handwriting text-2xl sm:text-3xl md:text-4xl text-gray-900 leading-relaxed font-semibold whitespace-pre-line min-h-[300px] relative z-10 tracking-wide px-2 sm:px-4 py-1">
+                {displayedText}
+                {isTyping && (
+                  <span className="inline-block w-2.5 h-7 bg-pink-600 ml-1.5 align-middle animate-pulse rounded-full" />
+                )}
+              </div>
+
+              {/* Signature Section */}
+              {signature && (
+                <div className="mt-8 pt-4 border-t border-amber-300/60 text-right relative z-10">
+                  <p className="font-script text-3xl sm:text-4xl text-pink-700 font-bold">
+                    {signature}
+                  </p>
+                </div>
+              )}
+
+              {/* Footer Controls */}
+              <div className="mt-10 pt-6 border-t border-amber-300/60 flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10">
+                <div className="flex items-center gap-3">
+                  {isTyping ? (
+                    <button
+                      onClick={showFullImmediately}
+                      className="flex items-center gap-1.5 text-xs font-bold text-pink-700 hover:text-pink-900 bg-pink-100 hover:bg-pink-200 px-3.5 py-2 rounded-full transition-all cursor-pointer border border-pink-300 shadow-sm"
+                    >
+                      <FastForward size={14} />
+                      <span>Read Full Immediately</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={replayTyping}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-pink-700 hover:text-pink-900 bg-pink-100/60 hover:bg-pink-100 px-3.5 py-2 rounded-full transition-all cursor-pointer border border-pink-300/50"
+                    >
+                      <RotateCcw size={14} />
+                      <span>Replay Typing Effect</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Continue Button */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    if (isFullscreen) setIsFullscreen(false);
+                    if (onContinueToMemories) onContinueToMemories();
+                  }}
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-gradient-to-r from-[#FF3FA4] via-[#A83CFF] to-[#FFD166] text-white font-bold text-sm shadow-xl flex items-center justify-center gap-2 cursor-pointer border border-white/30 glow-pink"
+                >
+                  <span>Continue to Memories</span>
+                  <ArrowRight size={18} />
+                </motion.button>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
+        </AnimatePresence>
       )}
     </section>
   );
