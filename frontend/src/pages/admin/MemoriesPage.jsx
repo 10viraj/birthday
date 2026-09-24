@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, Plus, Trash2, Edit3, Compass, Calendar } from 'lucide-react';
 import { birthdayService } from '../../services/birthdayService';
 import { memoryService } from '../../services/memoryService';
+import { getFullImageUrl } from '../../utils/imageUrl';
 
 export default function MemoriesPage() {
   const [birthdays, setBirthdays] = useState([]);
@@ -244,7 +245,15 @@ export default function MemoriesPage() {
                 </div>
 
                 {m.image_path && (
-                  <img src={m.image_path} alt={m.title} className="w-24 h-20 rounded-xl object-cover border border-white/10" />
+                  <img 
+                    src={getFullImageUrl(m.image_path)} 
+                    alt={m.title} 
+                    className="w-24 h-20 rounded-xl object-cover border border-white/10"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80";
+                    }}
+                  />
                 )}
 
                 <button

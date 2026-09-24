@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Edit3, Trash2, ExternalLink, Sparkles, CheckCircle2, FileText, Lock } from 'lucide-react';
 import { birthdayService } from '../../services/birthdayService';
+import { getFullImageUrl } from '../../utils/imageUrl';
 
 export default function BirthdayListPage() {
   const [birthdays, setBirthdays] = useState([]);
@@ -107,9 +108,13 @@ export default function BirthdayListPage() {
 
                 <div className="flex items-center gap-4 mb-3">
                   <img
-                    src={item.profile_image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"}
+                    src={getFullImageUrl(item.profile_image, "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80")}
                     alt={item.name}
                     className="w-12 h-12 rounded-full object-cover border-2 border-pink-400/40 shadow-md"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80";
+                    }}
                   />
                   <div>
                     <h3 className="text-lg font-bold text-white font-serif-display">{item.name}</h3>

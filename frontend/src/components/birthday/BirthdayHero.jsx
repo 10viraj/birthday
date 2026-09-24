@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Heart, Crown } from 'lucide-react';
+import { getFullImageUrl } from '../../utils/imageUrl';
 
 export default function BirthdayHero({ birthdayName, profileImage, headline, message }) {
+  const defaultProfile = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80";
   return (
     <section className="relative min-h-[85vh] flex items-center justify-center pt-24 pb-16 px-4 overflow-hidden">
       {/* Background Glowing Halos */}
@@ -20,8 +22,12 @@ export default function BirthdayHero({ birthdayName, profileImage, headline, mes
           <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-pink-500 via-amber-400 to-purple-500 blur-md opacity-75 animate-pulse" />
           <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl">
             <img 
-              src={profileImage || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80"} 
+              src={getFullImageUrl(profileImage, defaultProfile)} 
               alt={birthdayName}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = defaultProfile;
+              }}
               className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-500"
             />
           </div>

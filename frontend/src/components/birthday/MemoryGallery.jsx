@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Image as ImageIcon, ChevronLeft, ChevronRight, X, Heart, Plus, Sparkles, Upload, Trash2, CheckCircle2, Loader2, Grid, ArrowLeft } from 'lucide-react';
 import { birthdayService } from '../../services/birthdayService';
+import { getFullImageUrl as resolveFullImageUrl } from '../../utils/imageUrl';
 
 const DEFAULT_POLAROID_PHOTOS = [
   {
@@ -55,18 +56,8 @@ const DEFAULT_POLAROID_PHOTOS = [
 ];
 
 export const getFullImageUrl = (url, fallbackIdx = 0) => {
-  if (!url || typeof url !== 'string' || url.trim() === '') {
-    return DEFAULT_POLAROID_PHOTOS[fallbackIdx % DEFAULT_POLAROID_PHOTOS.length].url;
-  }
-  const cleanUrl = url.trim();
-  if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) {
-    return cleanUrl;
-  }
-  const apiBase = import.meta.env.VITE_API_BASE_URL || '';
-  if (cleanUrl.startsWith('/')) {
-    return apiBase ? `${apiBase}${cleanUrl}` : cleanUrl;
-  }
-  return apiBase ? `${apiBase}/${cleanUrl}` : `/${cleanUrl}`;
+  const fallback = DEFAULT_POLAROID_PHOTOS[fallbackIdx % DEFAULT_POLAROID_PHOTOS.length].url;
+  return resolveFullImageUrl(url, fallback);
 };
 
 export default function MemoryGallery({ photos = [], slug = 'kavita' }) {

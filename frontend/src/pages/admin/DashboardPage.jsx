@@ -15,6 +15,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { birthdayService } from '../../services/birthdayService';
+import { getFullImageUrl } from '../../utils/imageUrl';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
@@ -132,9 +133,13 @@ export default function DashboardPage() {
                   <tr key={page.id} className="hover:bg-white/5 transition-colors">
                     <td className="p-3.5 font-semibold text-white flex items-center gap-3">
                       <img
-                        src={page.profile_image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"}
+                        src={getFullImageUrl(page.profile_image, "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80")}
                         alt={page.name}
                         className="w-8 h-8 rounded-full object-cover border border-pink-400/40"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80";
+                        }}
                       />
                       <span>{page.name}</span>
                     </td>

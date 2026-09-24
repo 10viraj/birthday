@@ -9,6 +9,17 @@ class BirthdayResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $profileImage = $this->profile_image;
+        if ($profileImage && !str_starts_with($profileImage, 'data:') && !str_starts_with($profileImage, 'blob:')) {
+            $appUrl = rtrim(config('app.url', ''), '/');
+            if (preg_match('/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i', $profileImage) && $appUrl && !str_contains($appUrl, 'localhost') && !str_contains($appUrl, '127.0.0.1')) {
+                $profileImage = preg_replace('/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i', $appUrl, $profileImage);
+            } elseif (str_starts_with($profileImage, '/storage') || str_starts_with($profileImage, 'storage/')) {
+                $clean = ltrim($profileImage, '/');
+                $profileImage = $appUrl ? "{$appUrl}/{$clean}" : "/{$clean}";
+            }
+        }
+
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
@@ -16,7 +27,7 @@ class BirthdayResource extends JsonResource
             'slug' => $this->slug,
             'birth_date' => $this->birth_date?->format('Y-m-d'),
             'timezone' => $this->timezone ?? 'UTC',
-            'profile_image' => $this->profile_image,
+            'profile_image' => $profileImage,
             'headline' => $this->headline,
             'birthday_message' => $this->birthday_message,
             'letter_title' => $this->letter_title,

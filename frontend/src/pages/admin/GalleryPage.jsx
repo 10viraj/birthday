@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, Plus, Trash2, Edit2, Upload, ArrowUp, ArrowDown, Images } from 'lucide-react';
 import { birthdayService } from '../../services/birthdayService';
 import { photoService } from '../../services/photoService';
+import { getFullImageUrl } from '../../utils/imageUrl';
 
 export default function GalleryPage() {
   const [birthdays, setBirthdays] = useState([]);
@@ -281,7 +282,15 @@ export default function GalleryPage() {
               <div key={photo.id} className="glass-card rounded-2xl overflow-hidden border border-pink-500/20 p-3 flex flex-col justify-between">
                 <div>
                   <div className="aspect-square rounded-xl overflow-hidden bg-purple-950 mb-3 border border-white/10 relative">
-                    <img src={photo.image_path} alt={photo.caption} className="w-full h-full object-cover" />
+                    <img 
+                      src={getFullImageUrl(photo.image_path)} 
+                      alt={photo.caption} 
+                      className="w-full h-full object-cover" 
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80";
+                      }}
+                    />
                   </div>
                   <h4 className="text-xs font-bold text-white truncate">{photo.caption || 'Untitled'}</h4>
                   {photo.taken_at && <span className="text-[10px] text-pink-300 block mt-0.5">{photo.taken_at}</span>}

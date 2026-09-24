@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Compass, Calendar, Heart, Sparkles, Star } from 'lucide-react';
+import { getFullImageUrl } from '../../utils/imageUrl';
 
 const DEFAULT_TIMELINE_STORY = [
   {
@@ -114,7 +115,7 @@ export default function MemoryTimeline({ memories = [], birthdayName = "My Girl"
                   <div className="md:col-span-5">
                     <div className="rounded-2xl overflow-hidden aspect-[4/3] bg-purple-950/50 border border-white/15 shadow-lg group-hover:scale-105 transition-transform duration-500">
                       <img
-                        src={item.image ? (item.image.startsWith('http') || item.image.startsWith('/') ? item.image : `/${item.image}`) : DEFAULT_TIMELINE_STORY[index % DEFAULT_TIMELINE_STORY.length].image}
+                        src={getFullImageUrl(item.image, DEFAULT_TIMELINE_STORY[index % DEFAULT_TIMELINE_STORY.length].image)}
                         alt={item.title}
                         className="w-full h-full object-cover"
                         onError={(e) => {
