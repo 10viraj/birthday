@@ -62,10 +62,11 @@ export const getFullImageUrl = (url, fallbackIdx = 0) => {
   if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) {
     return cleanUrl;
   }
+  const apiBase = import.meta.env.VITE_API_BASE_URL || '';
   if (cleanUrl.startsWith('/')) {
-    return cleanUrl;
+    return apiBase ? `${apiBase}${cleanUrl}` : cleanUrl;
   }
-  return `/${cleanUrl}`;
+  return apiBase ? `${apiBase}/${cleanUrl}` : `/${cleanUrl}`;
 };
 
 export default function MemoryGallery({ photos = [], slug = 'kavita' }) {
